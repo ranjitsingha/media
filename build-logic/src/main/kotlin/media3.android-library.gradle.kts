@@ -32,7 +32,7 @@ android {
   defaultConfig {
     file("proguard-rules.txt").takeIf { it.exists() }?.let { consumerProguardFiles(it) }
     aarMetadata {
-      minCompileSdk = libs.findVersion("compileSdkVersion").get().requiredVersion.toInt()
+      minCompileSdk = 34
     }
   }
 
