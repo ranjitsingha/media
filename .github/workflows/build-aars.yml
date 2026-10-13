@@ -1,0 +1,76 @@
+name: Build Media3 AARs
+
+on:
+  push:
+    branches:
+      - build-mediastore
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Build Media3
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout Media3
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+          cache: 'gradle'
+
+      - name: Make gradlew executable
+        run: chmod +x gradlew
+
+      - name: Build and Publish to Maven Repository
+        run: |
+          ./gradlew \
+            :lib-transformer:publishReleasePublicationToMavenRepository \
+            :lib-muxer:publishReleasePublicationToMavenRepository \
+            :lib-effect:publishReleasePublicationToMavenRepository \
+            :lib-common:publishReleasePublicationToMavenRepository \
+            :lib-exoplayer:publishReleasePublicationToMavenRepository \
+            :lib-ui:publishReleasePublicationToMavenRepository \
+            :lib-container:publishReleasePublicationToMavenRepository \
+            :lib-datasource:publishReleasePublicationToMavenRepository \
+            :lib-decoder:publishReleasePublicationToMavenRepository \
+            :lib-extractor:publishReleasePublicationToMavenRepository \
+            :lib-transformer:assembleRelease \
+            :lib-muxer:assembleRelease \
+            :lib-effect:assembleRelease \
+            :lib-common:assembleRelease \
+            :lib-exoplayer:assembleRelease \
+            :lib-ui:assembleRelease \
+            -PmavenRepo="${{ github.workspace }}/repo" \
+            -Dorg.gradle.jvmargs="-Xmx5g -XX:MaxMetaspaceSize=1g" \
+            -x test -x lint -x check \
+            --stacktrace --no-daemon
+
+      - name: Verify Built Artifacts
+        run: |
+          echo "=== Maven Repository ==="
+          ls -la repo/ || true
+          find repo/ -type f || true
+          echo "=== AAR Outputs ==="
+          find libraries/ -name "*.aar" || true
+
+      - name: Upload Local Maven Repository
+        uses: actions/upload-artifact@v4
+        with:
+          name: media3-maven-repo
+          path: repo/
+
+      - name: Upload AAR Files
+        uses: actions/upload-artifact@v4
+        with:
+          name: media3-aars
+          path: |
+            **/outputs/aar/*.aar
+            **/*.aar
