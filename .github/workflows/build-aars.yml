@@ -31,23 +31,7 @@ jobs:
 
       - name: Build and Publish to Maven Repository
         run: |
-          ./gradlew \
-            :lib-transformer:publishReleasePublicationToMavenRepository \
-            :lib-muxer:publishReleasePublicationToMavenRepository \
-            :lib-effect:publishReleasePublicationToMavenRepository \
-            :lib-common:publishReleasePublicationToMavenRepository \
-            :lib-exoplayer:publishReleasePublicationToMavenRepository \
-            :lib-ui:publishReleasePublicationToMavenRepository \
-            :lib-container:publishReleasePublicationToMavenRepository \
-            :lib-datasource:publishReleasePublicationToMavenRepository \
-            :lib-decoder:publishReleasePublicationToMavenRepository \
-            :lib-extractor:publishReleasePublicationToMavenRepository \
-            :lib-transformer:assembleRelease \
-            :lib-muxer:assembleRelease \
-            :lib-effect:assembleRelease \
-            :lib-common:assembleRelease \
-            :lib-exoplayer:assembleRelease \
-            :lib-ui:assembleRelease \
+          ./gradlew publishReleasePublicationToMavenRepository \
             -PmavenRepo="${{ github.workspace }}/repo" \
             -Dorg.gradle.jvmargs="-Xmx5g -XX:MaxMetaspaceSize=1g" \
             -x test -x lint -x check \
@@ -58,8 +42,6 @@ jobs:
           echo "=== Maven Repository ==="
           ls -la repo/ || true
           find repo/ -type f || true
-          echo "=== AAR Outputs ==="
-          find libraries/ -name "*.aar" || true
 
       - name: Upload Local Maven Repository
         uses: actions/upload-artifact@v4
